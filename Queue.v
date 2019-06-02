@@ -24,8 +24,6 @@ Definition queue_empty {X: Type} (q: @queue X) :=
 Inductive eq_queue : forall X : Type , @queue X -> @queue X -> Prop :=
 | eq_q X (F1 R1 F2 R2 : @list X): F1 ++ (rev R1) = F2 ++ (rev R2) -> eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
 
-
-
 Check pair.
 Print option.
 Locate pair.
@@ -95,7 +93,7 @@ Inductive eq_dequeue: forall (X: Type)
                     (q1 : @queue X)
                     (q2 : @queue X)
                     (e: eq_queue X q1 q2) : eq_dequeue X (Some (h, q1)) (Some (h, q2)).
-  
+
 Lemma eq_correct {X: Type} (q1 : @queue X) (q2: @queue X) :
       eq_queue X q1 q2 -> eq_dequeue X (dequeue q1) (dequeue q2).
 Proof.
@@ -105,8 +103,20 @@ Proof.
      + intro.
        apply (queues_empty X).
      + intro.
-       inversion H.
-       subst.
+       remember (fun_queue [] []) as Eqn.
+       remember (fun_queue [] (x :: R0)) as Eqn2.
+       destruct H.
+       injection HeqEqn.
+       intros. subst.
+       simpl in H.
+       injection HeqEqn2.
+       intros. subst.
+       simpl in H.
+       destruct (rev R0) as [|h t].
+       ++ simpl in H. discriminate H.
+       ++ simpl in H. discriminate H.
+     + intro.
+
 
 
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
