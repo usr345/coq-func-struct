@@ -85,6 +85,30 @@ Proof.
   intros. apply queue_empty_reflection in H. rewrite -> H. simpl. reflexivity.
 Qed.
 
+Inductive eq_dequeue: forall (X: Type)
+                      (r1: option (X * (@queue X)))
+                      (r2: option (X * (@queue X))),
+            Prop :=
+  | queues_empty (X: Type) : eq_dequeue X None None
+  | queues_nonempty (X: Type)
+                    (h: X)
+                    (q1 : @queue X)
+                    (q2 : @queue X)
+                    (e: eq_queue X q1 q2) : eq_dequeue X (Some (h, q1)) (Some (h, q2)).
+  
+Lemma eq_correct {X: Type} (q1 : @queue X) (q2: @queue X) :
+      eq_queue X q1 q2 -> eq_dequeue X (dequeue q1) (dequeue q2).
+Proof.
+   destruct q1, q2.
+   destruct F, F0 ; simpl.
+   - destruct R, R0 ; simpl.
+     + intro.
+       apply (queues_empty X).
+     + intro.
+       inversion H.
+       subst.
+
+
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
       queue_empty q = false ->
       exists y:X, exists (q':@queue X), dequeue q = Some (y, q')
