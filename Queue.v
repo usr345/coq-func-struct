@@ -22,7 +22,7 @@ Definition queue_empty {X: Type} (q: @queue X) :=
 (*   | reversed X (a b : list X): (a = List.rev b) -> list_reversed X a b. *)
 
 Inductive eq_queue : forall X : Type , @queue X -> @queue X -> Prop :=
-| eq_q X (F1 R1 F2 R2 : @list X): F1 ++ (rev R1) = F2 ++ (rev R2) -> eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
+| eq_q X (F1 R1 F2 R2 : @list X) (e: F1 ++ (rev R1) = F2 ++ (rev R2)): eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
 
 Check pair.
 Print option.
@@ -103,21 +103,182 @@ Proof.
      + intro.
        apply (queues_empty X).
      + intro.
-       remember (fun_queue [] []) as Eqn.
-       remember (fun_queue [] (x :: R0)) as Eqn2.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue [] (x :: R0)) as NQ.
        destruct H.
-       injection HeqEqn.
-       intros. subst.
-       simpl in H.
-       injection HeqEqn2.
-       intros. subst.
-       simpl in H.
-       destruct (rev R0) as [|h t].
-       ++ simpl in H. discriminate H.
-       ++ simpl in H. discriminate H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       destruct (rev R0) ; simpl in e ; inversion e.
      + intro.
-
-
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue [] (x :: R)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       destruct (rev R) ; simpl in e ; inversion e.
+     + intro.
+       remember (fun_queue [] (x :: R)) as Q1.
+       remember (fun_queue [] (x0 :: R0)) as Q2.
+       destruct H.
+       inversion HeqQ1 ; subst.
+       inversion HeqQ2 ; subst.
+       Search "app_nil".
+       rewrite app_nil_l in e.
+       rewrite app_nil_l in e.
+       Search "rev_".
+       Search "f_equal".
+       apply (f_equal (@rev X)) in e.
+       rewrite rev_involutive in e.
+       rewrite rev_involutive in e.
+       inversion e ; subst.
+       apply queues_nonempty.
+       apply eq_q.
+       reflexivity.
+   - destruct R, R0 ; simpl.
+     + intro.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue (x :: F0) []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e. discriminate e.
+     + intro.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue (x :: F0) (x0 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e. discriminate e.
+     + intro.
+       remember (fun_queue [] (x0 :: R)) as EQ.
+       remember (fun_queue (x :: F0) []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite app_nil_r in e.
+       rewrite -> e.
+       simpl.
+       apply queues_nonempty.
+       apply eq_q.
+       reflexivity.
+     + intro.
+       remember (fun_queue [] (x0 :: R)) as EQ.
+       remember (fun_queue (x :: F0) (x1 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite -> e.
+       simpl.
+       apply queues_nonempty.
+       apply eq_q.
+       simpl.
+       rewrite app_nil_r.
+       reflexivity.
+   - destruct R, R0 ; simpl.
+     + intro.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue (x :: F) []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e. discriminate e.
+     + intro.
+       remember (fun_queue (x :: F) []) as EQ.
+       remember (fun_queue [] (x0 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite <- e.
+       simpl.
+       apply queues_nonempty.
+       rewrite app_nil_r.
+       apply eq_q.
+       reflexivity.
+     + intro.
+       remember (fun_queue (x :: F) (x0 :: R)) as EQ.
+       remember (fun_queue [] []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       discriminate e.
+     + intro.
+       remember (fun_queue (x :: F) (x0 :: R)) as EQ.
+       remember (fun_queue [] (x1 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite <- e.
+       simpl.
+       apply queues_nonempty.
+       apply eq_q.
+       simpl.
+       rewrite app_nil_r.
+       reflexivity.
+   - destruct R, R0 ; simpl.
+     + intro.
+       remember (fun_queue (x :: F) []) as EQ.
+       remember (fun_queue (x0 :: F0) []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite app_nil_r in e.
+       rewrite app_nil_r in e.
+       inversion e ; subst.
+       apply queues_nonempty.
+       apply eq_q.
+       reflexivity.
+     + intro.
+       remember (fun_queue (x :: F) []) as EQ.
+       remember (fun_queue (x0 :: F0) (x1 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       rewrite app_nil_r in e.
+       inversion e ; subst.
+       apply queues_nonempty.
+       apply eq_q.
+       simpl.
+       rewrite app_nil_r.
+       reflexivity.
+     + intro.
+       remember (fun_queue (x :: F) (x1 :: R)) as EQ.
+       remember (fun_queue (x0 :: F0) []) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       inversion e ; subst.
+       rewrite app_nil_r in e.
+       rewrite app_nil_r in H1.
+       apply queues_nonempty.
+       apply eq_q.
+       simpl.
+       rewrite app_nil_r.
+       rewrite <- H1.
+       reflexivity.
+     + intro.
+       remember (fun_queue (x :: F) (x1 :: R)) as EQ.
+       remember (fun_queue (x0 :: F0) (x2 :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       inversion e ; subst.
+       apply queues_nonempty.
+       apply eq_q.
+       simpl.
+       rewrite <- H1.
+       reflexivity.
+Qed.
 
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
       queue_empty q = false ->
