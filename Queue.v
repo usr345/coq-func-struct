@@ -18,6 +18,14 @@ Definition queue_empty {X: Type} (q: @queue X) :=
   | fun_queue _ _ => false
   end.
 
+(* Inductive list_reversed : forall X , list X -> list X -> Prop := *)
+(*   | reversed X (a b : list X): (a = List.rev b) -> list_reversed X a b. *)
+
+Inductive eq_queue : forall X : Type , @queue X -> @queue X -> Prop :=
+| eq_q X (F1 R1 F2 R2 : @list X): F1 ++ (rev R1) = F2 ++ (rev R2) -> eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
+
+
+
 Check pair.
 Print option.
 Locate pair.
