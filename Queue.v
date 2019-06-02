@@ -34,6 +34,14 @@ Check [1;2].
 Check @fun_queue nat.
 Definition myqueue := @fun_queue nat [1;2] [4;3].
 
+Theorem a : forall a b c d e f,
+    a + b + c + d + e = f.
+Proof.
+  intros.
+  Check PeanoNat.Nat.add_assoc a (b + c) d.
+  Check PeanoNat.Nat.add_assoc a b (c + d).
+Abort.
+
 Fixpoint dequeue {X : Type} (q : @queue X) : option (X * (@queue X)) :=
   match q with
   | fun_queue F R =>
@@ -279,6 +287,223 @@ Proof.
        rewrite <- H1.
        reflexivity.
 Qed.
+
+Lemma eq_correct_enqueue {X: Type} (q1 : @queue X) (q2: @queue X) :
+      forall (x : X), eq_queue X q1 q2 -> eq_queue X (enqueue x q1) (enqueue x q2).
+Proof.
+  intros.
+  destruct q1, q2.
+  destruct F, F0 ; simpl.
+  - destruct R, R0 ; simpl.
+    + apply eq_q. reflexivity.
+    + remember (fun_queue [] []) as EQ.
+      remember (fun_queue [] (x0 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      destruct (rev R0).
+      ++ rewrite app_nil_l in e.
+         discriminate e.
+      ++ simpl in e. discriminate e.
+    + remember (fun_queue [] (x0 :: R)) as EQ.
+      remember (fun_queue [] []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      destruct (rev R).
+      ++ rewrite app_nil_l in e.
+         discriminate e.
+      ++ simpl in e. discriminate e.
+    + remember (fun_queue [] (x0 :: R)) as EQ.
+      remember (fun_queue [] (x1 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      rewrite app_nil_l in e.
+      rewrite app_nil_l in e.
+      apply (f_equal (@rev X)) in e.
+      rewrite rev_involutive in e.
+      rewrite rev_involutive in e.
+      inversion e ; subst.
+      apply eq_q.
+      reflexivity.
+  - destruct R, R0 ; simpl.
+    + remember (fun_queue [] []) as EQ.
+      remember (fun_queue (x0 :: F0) []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      discriminate e.
+    + remember (fun_queue [] []) as EQ.
+      remember (fun_queue (x0 :: F0) (x1 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      discriminate e.
+    + remember (fun_queue [] (x1 :: R)) as EQ.
+      remember (fun_queue (x0 :: F0) []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      destruct (rev R) eqn:ER.
+      ++ rewrite app_nil_l in e.
+         intros.
+         apply eq_q.
+         rewrite app_nil_l.
+         simpl.
+         rewrite ER.
+         rewrite app_nil_l.
+         rewrite e.
+         reflexivity.
+      ++ injection e.
+         intros.
+         apply eq_q.
+         rewrite app_nil_l.
+         simpl.
+         rewrite ER.
+         rewrite -> e.
+         reflexivity.
+    + remember (fun_queue [] (x1 :: R)) as EQ.
+      remember (fun_queue (x0 :: F0) (x2 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      apply eq_q.
+      simpl.
+      rewrite -> e.
+      simpl.
+      rewrite <- app_assoc.
+      reflexivity.
+  - destruct R, R0 ; simpl.
+    + remember (fun_queue (x0 :: F) []) as EQ.
+      remember (fun_queue [] []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      discriminate e.
+    + remember (fun_queue (x0 :: F) []) as EQ.
+      remember (fun_queue [] (x1 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      apply eq_q.
+      rewrite app_nil_l.
+      rewrite e.
+      simpl.
+      reflexivity.
+    + remember (fun_queue (x0 :: F) (x1 :: R)) as EQ.
+      remember (fun_queue [] []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      discriminate e.
+    + remember (fun_queue (x0 :: F) (x1 :: R)) as EQ.
+      remember (fun_queue [] (x2 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      rewrite app_nil_l in e.
+      simpl in e.
+      apply eq_q.
+      simpl.
+      rewrite <- e.
+      (* rewrite <- app_assoc. *)
+      rewrite app_assoc.
+      simpl.
+      reflexivity.
+  - destruct R, R0 ; simpl.
+    + remember (fun_queue (x0 :: F) []) as EQ.
+      remember (fun_queue (x1 :: F0) []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      rewrite app_nil_r in e.
+      rewrite e.
+      apply eq_q.
+       reflexivity.
+    + remember (fun_queue (x0 :: F) []) as EQ.
+      remember (fun_queue (x1 :: F0) (x2 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      rewrite e.
+      apply eq_q.
+      simpl.
+      rewrite <- app_assoc.
+      reflexivity.
+    + remember (fun_queue (x0 :: F) (x2 :: R)) as EQ.
+      remember (fun_queue (x1 :: F0) []) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      rewrite app_nil_r in e.
+      apply eq_q.
+      rewrite <- e.
+      simpl.
+      rewrite app_assoc.
+      reflexivity.
+    + remember (fun_queue (x0 :: F) (x2 :: R)) as EQ.
+      remember (fun_queue (x1 :: F0) (x3 :: R0)) as NQ.
+      destruct H.
+      inversion HeqEQ ; subst.
+      inversion HeqNQ ; subst.
+      simpl in e.
+      inversion e ; subst.
+      apply eq_q.
+      simpl.
+      rewrite <- app_assoc.
+      assert (myH: x1 :: F ++ rev R ++ [x2] ++ [x] = (x1 :: F ++ rev R ++ [x2]) ++ [x]).
+      ++ simpl. rewrite <- app_assoc. rewrite <- app_assoc. reflexivity.
+      ++ rewrite -> myH. rewrite -> e.
+
+      (* autorewrite *)
+      repeat ( rewrite app_assoc ; simpl).
+      repeat ( rewrite app_assoc in e ; simpl in e).
+      reflexivity.
+
+
+      (* Our attempts *)
+      (* Check app_inv_tail [x] (x0 :: F ++ rev R ++ [x2]) (x1 :: F0 ++ (rev R0 ++ [x3])). *)
+     (*  rewrite <- app_assoc. *)
+     (*  Check (app_assoc (x0 :: F ++ rev R) [x2]). *)
+     (*  rewrite -> (app_inv_tail [x] (x0 :: F ++ rev R ++ [x2]) (x1 :: F0 ++ (rev R0 ++ [x3]))). *)
+     (*  apply Ha. *)
+     (*  rewrite -> (app_inv_tail [x] _ (x1 :: F0 ++ (rev R0 ++ [x3]))). *)
+     (*  rewrite -> (app_inv_tail [x] (x0 :: F ++ (rev R ++ [x2])) (F0 ++ (rev R0 ++ [x3]))). *)
+
+
+     (*  rewrite e. *)
+     (*  (* rewrite -> 2? app_assoc. *) *)
+     (*  rewrite -> app_assoc with _ (x0 :: F ++ rev R) _ _. *)
+     (*  remember (x0 :: F ++ rev R ++ [x2]) as A. *)
+     (*  rewrite <- HeqA. *)
+     (* (*  app_assoc *) *)
+     (* (* : forall (A : Type) (l m n : list A), l ++ m ++ n = (l ++ m) ++ n *) *)
+
+     (*  rewrite -> (app_assoc ) *)
+      (*  rewrite -> e. *)
+Qed.
+(* Inductive eq_queue *)
+(* Inductive eq_dequeue *)
+
 
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
       queue_empty q = false ->
