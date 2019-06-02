@@ -22,7 +22,7 @@ Definition queue_empty {X: Type} (q: @queue X) :=
 (*   | reversed X (a b : list X): (a = List.rev b) -> list_reversed X a b. *)
 
 Inductive eq_queue : forall X : Type , @queue X -> @queue X -> Prop :=
-| eq_q X (F1 R1 F2 R2 : @list X): F1 ++ (rev R1) = F2 ++ (rev R2) -> eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
+| eq_q X (F1 R1 F2 R2 : @list X) (e: F1 ++ (rev R1) = F2 ++ (rev R2)): eq_queue X (fun_queue F1 R1) (fun_queue F2 R2).
 
 
 
@@ -105,8 +105,40 @@ Proof.
      + intro.
        apply (queues_empty X).
      + intro.
-       inversion H.
-       subst.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue [] (x :: R0)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       destruct (rev R0) ; simpl in e ; inversion e.
+     + intro.
+       remember (fun_queue [] []) as EQ.
+       remember (fun_queue [] (x :: R)) as NQ.
+       destruct H.
+       inversion HeqEQ ; subst.
+       inversion HeqNQ ; subst.
+       simpl in e.
+       destruct (rev R) ; simpl in e ; inversion e.
+     + intro.
+       remember (fun_queue [] (x :: R)) as Q1.
+       remember (fun_queue [] (x0 :: R0)) as Q2.
+       destruct H.
+       inversion HeqQ1 ; subst.
+       inversion HeqQ2 ; subst.
+       Search "app_nil".
+       rewrite app_nil_l in e.
+       rewrite app_nil_l in e.
+       Search "rev_".
+       Search "f_equal".
+       apply (f_equal (@rev X)) in e.
+       rewrite rev_involutive in e.
+       rewrite rev_involutive in e.
+       inversion e ; subst.
+       apply queues_nonempty.
+       apply eq_q.
+       reflexivity.
+   -
 
 
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
