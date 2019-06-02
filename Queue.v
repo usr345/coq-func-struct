@@ -102,6 +102,9 @@ Inductive eq_dequeue: forall (X: Type)
                     (q2 : @queue X)
                     (e: eq_queue X q1 q2) : eq_dequeue X (Some (h, q1)) (Some (h, q2)).
 
+Notation "X '||' x '~==~' y" := (eq_dequeue X x y)
+                                  (at level 50, left associativity).
+Check nat || None ~==~ None.
 Lemma eq_correct {X: Type} (q1 : @queue X) (q2: @queue X) :
       eq_queue X q1 q2 -> eq_dequeue X (dequeue q1) (dequeue q2).
 Proof.
@@ -503,12 +506,15 @@ Proof.
 Qed.
 (* Inductive eq_queue *)
 (* Inductive eq_dequeue *)
-
-
+(*
+Inductive eq_dequeue: forall (X: Type)
+                      (r1: option (X * (@queue X)))
+                      (r2: option (X * (@queue X))),
+    *)
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
       queue_empty q = false ->
       exists y:X, exists (q':@queue X), dequeue q = Some (y, q')
-      -> dequeue (enqueue x q) = Some (y, enqueue x q').
+      -> X || (dequeue (enqueue x q)) ~==~ (Some (y, enqueue x q')).
 Proof.
   intros X x q H. destruct q eqn:E. destruct F eqn:EF, R eqn:ER.
   - simpl in H. discriminate H.
