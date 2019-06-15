@@ -1,6 +1,7 @@
 Require Import List.
 Open Scope list_scope.
 Import ListNotations.
+Require Import PeanoNat.
 
 (* Inductive option (A : Type) := *)
 (* | Just : A -> option A *)
@@ -34,13 +35,14 @@ Check [1;2].
 Check @fun_queue nat.
 Definition myqueue := @fun_queue nat [1;2] [4;3].
 
-Theorem a : forall a b c d e f,
-    a + b + c + d + e = f.
-Proof.
-  intros.
-  Check PeanoNat.Nat.add_assoc a (b + c) d.
-  Check PeanoNat.Nat.add_assoc a b (c + d).
-Abort.
+(* Theorem a : forall a b c d e f, *)
+(*     a + b + c + d + e = f. *)
+(* Proof. *)
+(*   intros. *)
+  (* rewrite <- (PeanoNat.Nat.add_assoc a (b + c) d). *)
+  (* Check PeanoNat.Nat.add_assoc a (b + c) d. *)
+  (* Check PeanoNat.Nat.add_assoc a b (c + d). *)
+(* Abort. *)
 
 Fixpoint dequeue {X : Type} (q : @queue X) : option (X * (@queue X)) :=
   match q with
@@ -510,7 +512,30 @@ Qed.
 Inductive eq_dequeue: forall (X: Type)
                       (r1: option (X * (@queue X)))
                       (r2: option (X * (@queue X))),
-    *)
+            Prop :=
+  | queues_empty (X: Type) : eq_dequeue X None None
+  | queues_nonempty (X: Type)
+                    (h: X)
+                    (q1 : @queue X)
+                    (q2 : @queue X)
+                    (e: eq_queue X q1 q2) : eq_dequeue X (Some (h, q1)) (Some (h, q2)).
+ *)
+Lemma head_equal: forall (X : Type), forall (l: list X) (x:X) (x0:X),
+      hd x ((rev l) ++ [x0]) = hd x (((rev l) ++ [x0]) ++ [x]).
+Proof.
+  intros. destruct ((rev l) ++ [x0]).
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+Qed.
+
+Lemma tail_equal: forall (X : Type), forall (l: list X) (x:X),
+      l <> [] -> tl (l ++ [x]) = tl (l) ++ [x].
+Proof.
+  destruct l as [|h t] eqn:E.
+  - unfold not. simpl. intros. exfalso. apply H. reflexivity.
+  - intros. simpl. reflexivity.
+Qed.
+
 Theorem dequeue_enqueue2 : forall (X : Type) (x:X), forall q:(@queue X),
       queue_empty q = false ->
       exists y:X, exists (q':@queue X), dequeue q = Some (y, q')
@@ -519,7 +544,26 @@ Proof.
   intros X x q H. destruct q eqn:E. destruct F eqn:EF, R eqn:ER.
   - simpl in H. discriminate H.
   - clear H. exists (hd x (rev R)). exists (fun_queue (tl (rev R)) nil).
-    simpl. intros H.
+    intros H.
+    rewrite -> ER.
+    simpl. rewrite <- head_equal.
+    (* hd x ((rev l ++ [x0]) ++ [x]) *)
+    (* hd x (rev R) *)
+    apply (queues_nonempty X). apply eq_q. simpl. rewrite app_nil_r. apply tail_equal.
+    destruct l as [|h t].
+    + simpl. unfold not. intros H1. discriminate H1.
+    + simpl. unfold not. intros H1. destruct (rev t ++ [h]) as [|h1 t1].
+      ++ simpl in H1. discriminate H1.
+      ++ simpl in H1. discriminate H1.
+  - clear H. exists (hd x F). exists (fun_queue (tl F) nil).
+    intros H. rewrite -> EF.
+    simpl. apply (queues_nonempty X). apply eq_q. reflexivity.
+  - clear H. exists (hd x F). exists (fun_queue (tl F) R). intros H.
+    rewrite -> EF. rewrite -> ER. simpl.
+    apply (queues_nonempty X). apply eq_q. reflexivity.
+Qed.
+
+(* Unit tests *)
 
 Example test_dequeue1 :
   dequeue (fun_queue nat nil nil) = None.
