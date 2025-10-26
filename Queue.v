@@ -35,16 +35,7 @@ Check [1;2].
 Check @fun_queue nat.
 Definition myqueue := @fun_queue nat [1;2] [4;3].
 
-(* Theorem a : forall a b c d e f, *)
-(*     a + b + c + d + e = f. *)
-(* Proof. *)
-(*   intros. *)
-  (* rewrite <- (PeanoNat.Nat.add_assoc a (b + c) d). *)
-  (* Check PeanoNat.Nat.add_assoc a (b + c) d. *)
-  (* Check PeanoNat.Nat.add_assoc a b (c + d). *)
-(* Abort. *)
-
-Fixpoint dequeue {X : Type} (q : @queue X) : option (X * (@queue X)) :=
+Definition dequeue {X : Type} (q : @queue X) : option (X * (@queue X)) :=
   match q with
   | fun_queue F R =>
     match F with
@@ -58,7 +49,7 @@ Fixpoint dequeue {X : Type} (q : @queue X) : option (X * (@queue X)) :=
     end
   end.
 
-Fixpoint enqueue {X : Type} (a : X) (q : queue) : queue :=
+Definition enqueue {X : Type} (a : X) (q : queue) : queue :=
   match q with
   | fun_queue F R =>
     fun_queue F (cons a R)
@@ -566,34 +557,34 @@ Qed.
 (* Unit tests *)
 
 Example test_dequeue1 :
-  dequeue (fun_queue nat nil nil) = None.
+  dequeue (@fun_queue nat nil nil) = None.
 Proof. reflexivity. Qed.
 
 Example test_dequeue2 :
-  dequeue (fun_queue nat [1] nil) = Some (1, (fun_queue nat [] nil)).
+  dequeue (fun_queue [1] nil) = Some (1, (fun_queue [] nil)).
 Proof. reflexivity. Qed.
 
 Example test_dequeue3 :
-  dequeue (fun_queue nat [1;2;3] [5;4]) = Some (1, (fun_queue nat [2;3] [5;4])).
+  dequeue (fun_queue [1;2;3] [5;4]) = Some (1, (fun_queue [2;3] [5;4])).
 Proof. reflexivity. Qed.
 
-Compute dequeue (fun_queue nat nil [2;1]).
+Compute dequeue (fun_queue nil [2;1]).
 
 Example test_dequeue4 :
-  dequeue (fun_queue nat nil [3;2;1]) = Some (1, (fun_queue nat [2;3] nil)).
+  dequeue (fun_queue nil [3;2;1]) = Some (1, (fun_queue [2;3] nil)).
 Proof. reflexivity. Qed.
 
 Example test_dequeue5 :
-  dequeue (fun_queue nat nil [1]) = Some (1, (fun_queue nat nil nil)).
+  dequeue (fun_queue nil [1]) = Some (1, (fun_queue nil nil)).
 Proof. reflexivity. Qed.
 
 Compute dequeue myqueue.
-Compute enqueue 1 (fun_queue nat nil nil).
+Compute enqueue 1 (fun_queue nil nil).
 
 Example test_enque1 :
-  enqueue 1 (fun_queue nat nil nil) = fun_queue nat nil [1].
+  enqueue 1 (fun_queue nil nil) = fun_queue nil [1].
 Proof. reflexivity. Qed.
 
 Example test_enque2 :
-  enqueue 5 (fun_queue nat [1;2] [4;3]) = fun_queue nat [1;2] [5;4;3].
+  enqueue 5 (fun_queue [1;2] [4;3]) = fun_queue [1;2] [5;4;3].
 Proof. reflexivity. Qed.
