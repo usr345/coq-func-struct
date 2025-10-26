@@ -10,6 +10,12 @@ Require Import PeanoNat.
 (* Arguments Just [A] _. *)
 (* Arguments Nothing [A]. *)
 
+(*
+  Функциональная очередь, реализованная через 2 списка Forward и Reverse.
+  Список F используется для извлечения элементов из очереди
+  R --- для добавления в очередь.
+  Если F пуст, R revers-ится, и присваивается F.
+*)
 Inductive queue {X:Type} : Type :=
 | fun_queue (F : list X) (R : list X).
 
